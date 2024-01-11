@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BlockWorld</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <style>
     body {
       background-color: #2c3e50;
@@ -12,24 +13,6 @@
       justify-content: center;
       height: 100vh;
       margin: 0;
-    }
-
-    #logoLink {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    #grassBlock {
-      position: relative;
-      background-color: #8B4513;
-      width: 200px;
-      height: 200px;
-      padding: 20px;
-      border-radius: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     }
 
     #logo {
@@ -54,10 +37,6 @@
   </style>
 </head>
 <body>
-  <a id="logoLink" href="https://beargamer12.github.io/blockworld/">
-    <div id="grassBlock">
-      <div id="logo">BlockWorld</div>
-    </div>
-  </a>
+  <div id="logo">BlockWorld</div>
 </body>
 </html>
