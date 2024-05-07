@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>BlockWorld</title>
-
+        
         <style>
             body {
                 margin: 0;
@@ -73,16 +73,16 @@
             <div id="feedback"></div>
         </div>
         <div id="hotbar-container">
-            <div class="hotbar-item" style="background-color: #ff0000;"></div>
-            <div class="hotbar-item" style="background-color: #00ff00;"></div>
+            <div class="hotbar-item" style="background-image: url('redstone_block.jpg');"></div> 
+            <div class="hotbar-item" style="background-image: url('emerald_block.jpg');"></div>
             <div class="hotbar-item" style="background-image: url('platform_texture.jpg');"></div>
             <div class="hotbar-item" style="background-image: url('gold_block.jpg');"></div>
-            <div class="hotbar-item" style="background-image: url('trunk.jpg');"></div>
-            <div class="hotbar-item" style="background-color: #00ffff;"></div>
-            <div class="hotbar-item" style="background-color: #ffa500;"></div>
-            <div class="hotbar-item" style="background-color: #808080;"></div>
-            <div class="hotbar-item" style="background-color: #800000;"></div>
-            <div class="hotbar-item" style="background-color: #008000;"></div>
+            <div class="hotbar-item" style="background-image: url('trunk.jpg');"></div> 
+            <div class="hotbar-item" style="background-image: url('diamond_block.jpg');"></div> 
+            <div class="hotbar-item" style="background-image: url('leaves.jpg');"></div> 
+            <div class="hotbar-item" style="background-image: url('stone.jpg');"></div> 
+            <div class="hotbar-item" style="background-image: url('snow.jpg');"></div> 
+            
         </div>
         
         <div id="crosshair"></div>
@@ -132,12 +132,13 @@
             const groundTexture = groundTextureLoader.load("platform_texture.jpg");
             groundTexture.wrapS = THREE.RepeatWrapping;
             groundTexture.wrapT = THREE.RepeatWrapping;
-            
+            const leaveste = new THREE.TextureLoader();
+            const leavest = leaveste.load("leaves.jpg");
             // Set texture repeat based on platform size and texture dimensions
             groundTexture.repeat.set(platformSize / textureWidth, platformSize / textureHeight);
-
+            
             const groundMaterial = new THREE.MeshStandardMaterial({ map: groundTexture });
-
+            
             const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
             groundMesh.rotation.x = -Math.PI / 2;
             groundMesh.receiveShadow = true;
@@ -168,15 +169,33 @@
                     case "a":
                         moveState.right = true;
                         break;
-                    case " ":
-                        if (canJump) {
-                            player.position.y += jumpVelocity;
-                            canJump = false;
-                            setTimeout(() => {
-                                canJump = true;
-                            }, 600);
-                        }
-                        break;
+                        case " ":
+                        
+    if (canJump && player.position.y <= playerHeight / 2 + gridHeight / 2) {
+        const jumpHeight = 2; // Adjust the jump height as needed
+        const jumpDuration = 500; // Adjust the jump duration in milliseconds as needed
+        const initialY = player.position.y;
+        const targetY = initialY + jumpHeight;
+        const startTime = Date.now();
+
+        const jumpAnimation = () => {
+            const elapsedTime = Date.now() - startTime;
+            const progress = Math.min(elapsedTime / jumpDuration, 1); // Ensure progress doesn't exceed 1
+            player.position.y = initialY + jumpHeight * Math.sin(progress * Math.PI); // Use a sinusoidal function for smoother animation
+            
+            if (progress < 1) {
+                requestAnimationFrame(jumpAnimation);
+            } else {
+                canJump = true;
+            }
+        };
+
+        canJump = false;
+        jumpAnimation();
+    }
+    break;
+
+
                     case "1":
                         setSelectedBlockColor(0);
                         break;
@@ -287,16 +306,20 @@
                 }
             }
             function checkCollision() {
-                const playerHeadPosition = controls.getObject().position.clone();
-                playerHeadPosition.y += playerHeight;
-                for (const block of blocks) {
-                    const blockBox = new THREE.Box3().setFromObject(block);
-                    const playerBox = new THREE.Box3().setFromObject(player);
-                    if (blockBox.intersectsBox(playerBox)) {
-                        player.position.y = block.position.y + block.geometry.parameters.height + playerHeight / 2;
-                    }
-                }
-            }
+    const playerHeadPosition = controls.getObject().position.clone();
+    playerHeadPosition.y += playerHeight;
+
+    for (const block of blocks) {
+        const blockBox = new THREE.Box3().setFromObject(block);
+        const playerBox = new THREE.Box3().setFromObject(player);
+
+        // Check if the player is intersecting with the block and the block is not too tall
+        if (blockBox.intersectsBox(playerBox) && block.geometry.parameters.height <= 2) {
+            player.position.y = block.position.y + block.geometry.parameters.height + playerHeight / 2;
+        }
+    }
+}
+
             function placeBlock() {
                 const blockGeometry = new THREE.BoxGeometry();
                 const blockMaterial = getSelectedBlockColor();
@@ -321,7 +344,7 @@
             }
             function placeTorch() {
                 const torchGeometry = new THREE.CylinderGeometry(0.2, 0.1, 1, 16);
-                const torchMaterial = new THREE.MeshStandardMaterial({ emissive: 0xffd700, emissiveIntensity: 1, color: 0x000000 });
+                const torchMaterial = new THREE.MeshStandardMaterial({ emissive: 0xffd700, emissiveIntensity: 5, color: 0x000000 });
                 const torch = new THREE.Mesh(torchGeometry, torchMaterial);
                 const playerDirection = new THREE.Vector3();
                 controls.getObject().getWorldDirection(playerDirection);
@@ -439,17 +462,16 @@
             }
             function getSelectedBlockColor() {
     const colors = [
-        0xff0000,  // Red
-        0x00ff00,  // Green
-        // Use platform texture for the third color
+        "redstone_block.jpg",
+        "emerald_block.jpg",
         "platform_texture.jpg", 
         "gold_block.jpg",
-        "trunk.jpg",
-        0x00ffff,  // Cyan
-        0xffa500,  // Orange
-        0x808080,  // Gray
-        0x800000,  // Dark Red
-        0x008000   // Dark Green
+        "trunk.jpg", 
+        "diamond_block.jpg",
+        "leaves.jpg",
+        "stone.jpg",
+        "snow.jpg",
+        
     ];
     
     const selectedColor = colors[selectedBlockColor];
@@ -474,7 +496,7 @@
                     item.classList.toggle("selected", index === selectedBlockColor);
                 });
             }
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 15; i++) {
                 const trunk = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 1), new THREE.MeshStandardMaterial({ map: trunkt }));
                 trunk.position.set(Math.random() * 200 - 100, gridHeight / 2, Math.random() * 200 - 100);
                 trunk.castShadow = true;
@@ -494,7 +516,7 @@
                     blocks.push(block);
                 }
                 for (let k = 0; k < 27; k++) {
-                    const leaves = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0x00ff00, transparent: true, opacity: 0.7 }));
+                    const leaves = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ map: leavest, transparent: true, opacity: 0.7 }));
                     leaves.position.x = trunk.position.x + (((k % 9) % 3) - 1);
                     leaves.position.y = trunk.position.y + Math.floor((k % 9) / 3) + 4;
                     leaves.position.z = trunk.position.z + Math.floor(k / 9) - 1;
@@ -521,4 +543,4 @@
             }
         </script>
     </body>
-</html>
+</html> 
